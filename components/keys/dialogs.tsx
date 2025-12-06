@@ -22,11 +22,13 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { KeyItem } from "@/lib/types";
 import { Loader2, Plus, Pencil, Trash2 } from "lucide-react";
+import { ErrorAlert } from "@/components/ui/error-alert";
 
 export function CreateKeyDialog({ featureId }: { featureId: string }) {
   const [open, setOpen] = useState(false);
   const [key, setKey] = useState("");
   const [description, setDescription] = useState("");
+  const [error, setError] = useState<Error | null>(null);
   const qc = useQueryClient();
 
   const mutation = useMutation({
@@ -36,6 +38,10 @@ export function CreateKeyDialog({ featureId }: { featureId: string }) {
       setOpen(false);
       setKey("");
       setDescription("");
+      setError(null);
+    },
+    onError: (err) => {
+      setError(err);
     },
   });
 
@@ -51,9 +57,10 @@ export function CreateKeyDialog({ featureId }: { featureId: string }) {
         <DialogHeader>
           <DialogTitle>Create Key</DialogTitle>
           <DialogDescription>
-            Add a new translation key to this feature.
+            Add a new translation key.
           </DialogDescription>
         </DialogHeader>
+        <ErrorAlert error={error} />
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
             <Label htmlFor="key">Key Name</Label>
@@ -102,6 +109,7 @@ export function EditKeyDialog({ item }: { item: KeyItem }) {
   const [open, setOpen] = useState(false);
   const [key, setKey] = useState(item.key);
   const [description, setDescription] = useState(item.description || "");
+  const [error, setError] = useState<Error | null>(null);
   const qc = useQueryClient();
 
   const mutation = useMutation({
@@ -111,6 +119,10 @@ export function EditKeyDialog({ item }: { item: KeyItem }) {
       qc.invalidateQueries({ queryKey: ["keys", item.featureId] });
       qc.invalidateQueries({ queryKey: ["key", item.id] });
       setOpen(false);
+      setError(null);
+    },
+    onError: (err) => {
+      setError(err);
     },
   });
 
@@ -128,6 +140,7 @@ export function EditKeyDialog({ item }: { item: KeyItem }) {
             Update key details.
           </DialogDescription>
         </DialogHeader>
+        <ErrorAlert error={error} />
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
             <Label htmlFor="edit-key">Key Name</Label>
@@ -172,6 +185,7 @@ export function EditKeyDialog({ item }: { item: KeyItem }) {
 
 export function DeleteKeyDialog({ item }: { item: KeyItem }) {
   const [open, setOpen] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
   const qc = useQueryClient();
 
   const mutation = useMutation({
@@ -179,6 +193,10 @@ export function DeleteKeyDialog({ item }: { item: KeyItem }) {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["keys", item.featureId] });
       setOpen(false);
+      setError(null);
+    },
+    onError: (err) => {
+      setError(err);
     },
   });
 
@@ -193,9 +211,10 @@ export function DeleteKeyDialog({ item }: { item: KeyItem }) {
         <DialogHeader>
           <DialogTitle>Delete Key</DialogTitle>
           <DialogDescription>
-            Are you sure you want to delete &quot;{item.key}&quot;? This action cannot be undone and will delete all translations for this key.
+            Are you sure you want to delete &quot;{item.key}&quot;? This action cannot be undone and will delete all associated translations.
           </DialogDescription>
         </DialogHeader>
+        <ErrorAlert error={error} />
         <DialogFooter>
           <Button
             variant="outline"

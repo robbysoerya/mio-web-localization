@@ -63,7 +63,7 @@ export default function DashboardPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Translation Dashboard</h1>
+          <h1 className="text-3xl font-bold">Localization Dashboard</h1>
           <p className="text-muted-foreground mt-1">
             Monitor translation progress, quality, and system health
           </p>
@@ -98,7 +98,7 @@ export default function DashboardPage() {
           <BarChart3 className="h-5 w-5" />
           Overview
         </h2>
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
           <MetricCard
             title="Overall Completion"
             value={formatPercentage(statistics.overallCompletionPercentage)}
@@ -143,7 +143,7 @@ export default function DashboardPage() {
       {/* Completion Metrics */}
       <div>
         <h2 className="text-xl font-semibold mb-4">📊 Completion Metrics</h2>
-        <div className="grid gap-4 lg:grid-cols-2">
+        <div className="grid gap-4 grid-cols-1 lg:grid-cols-2">
           <CompletionChart
             data={statistics.completionByLocale}
             title="Completion by Locale"
@@ -160,7 +160,7 @@ export default function DashboardPage() {
       {/* Quality Metrics */}
       <div>
         <h2 className="text-xl font-semibold mb-4">🔍 Quality Metrics</h2>
-        <div className="grid gap-4 lg:grid-cols-2">
+        <div className="grid gap-4 grid-cols-1 lg:grid-cols-2">
           <RecentActivityFeed data={statistics.recentlyUpdated} />
           <Card className="p-6">
             <h3 className="text-lg font-semibold mb-4">Most Active Features</h3>

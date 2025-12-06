@@ -3,23 +3,24 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, Layers, Globe, Languages, Settings, Sun, Moon } from "lucide-react";
+import { LayoutDashboard, Layers, Globe, Languages, Settings, Sun, Moon, Zap } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 
-export function Sidebar() {
+export function SidebarContent() {
   const pathname = usePathname();
   const { theme, setTheme } = useTheme();
 
   const links = [
-    { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard                                    },
+    { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { href: "/features", label: "Features", icon: Layers },
     { href: "/translations", label: "Translations", icon: Globe },
     { href: "/languages", label: "Languages", icon: Languages },
+    { href: "/focus", label: "Focus Mode", icon: Zap },
   ];
 
   return (
-    <div className="w-72 border-r bg-card h-screen flex flex-col sticky top-0">
+    <div className="flex flex-col h-full bg-card">
       <div className="p-6">
         <div className="flex items-center gap-2 mb-8 px-2">
           <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
@@ -75,6 +76,14 @@ export function Sidebar() {
           </Button>
         </div>
       </div>
+    </div>
+  );
+}
+
+export function Sidebar() {
+  return (
+    <div className="hidden md:flex w-72 border-r bg-card h-screen flex-col sticky top-0">
+      <SidebarContent />
     </div>
   );
 }

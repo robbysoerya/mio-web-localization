@@ -3,6 +3,7 @@ import { Card } from "@/components/ui/card";
 import {
   formatPercentage,
   getCompletionBarColor,
+  getCompletionBgColor,
   getCompletionColor,
 } from "@/lib/utils/format";
 
@@ -43,7 +44,7 @@ export function CompletionChart({ data, title, type }: CompletionChartProps) {
                   {formatPercentage(percentage)}
                 </span>
               </div>
-              <div className="w-full bg-secondary rounded-full h-2.5 overflow-hidden">
+              <div className={`w-full rounded-full h-2.5 overflow-hidden ${getCompletionBgColor(percentage)}`}>
                 <div
                   className={`h-2.5 rounded-full transition-all ${getCompletionBarColor(
                     percentage

@@ -32,7 +32,6 @@ import {
   CreateTranslationDialog,
   DeleteTranslationDialog,
 } from "@/components/translations/dialogs";
-import { TranslationMemory } from "@/components/translations/TranslationMemory";
 
 export default function TranslationEditor() {
   const params = useParams();
@@ -173,12 +172,6 @@ export default function TranslationEditor() {
         </div>
       </div>
 
-      {/* Translation Memory */}
-      {data && data.length > 1 && (
-        <div className="mb-6">
-          <TranslationMemory translations={data} />
-        </div>
-      )}
 
       <Table>
         <TableHeader>

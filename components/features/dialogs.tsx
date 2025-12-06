@@ -22,11 +22,13 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Feature } from "@/lib/types";
 import { Loader2, Plus, Pencil, Trash2 } from "lucide-react";
+import { ErrorAlert } from "@/components/ui/error-alert";
 
 export function CreateFeatureDialog() {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  const [error, setError] = useState<Error | null>(null);
   const qc = useQueryClient();
 
   const mutation = useMutation({
@@ -36,6 +38,10 @@ export function CreateFeatureDialog() {
       setOpen(false);
       setName("");
       setDescription("");
+      setError(null);
+    },
+    onError: (err) => {
+      setError(err);
     },
   });
 
@@ -54,6 +60,7 @@ export function CreateFeatureDialog() {
             Add a new feature to organize your translation keys.
           </DialogDescription>
         </DialogHeader>
+        <ErrorAlert error={error} />
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
             <Label htmlFor="name">Name</Label>
@@ -101,6 +108,7 @@ export function EditFeatureDialog({ feature }: { feature: Feature }) {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState(feature.name);
   const [description, setDescription] = useState(feature.description || "");
+  const [error, setError] = useState<Error | null>(null);
   const qc = useQueryClient();
 
   const mutation = useMutation({
@@ -110,6 +118,10 @@ export function EditFeatureDialog({ feature }: { feature: Feature }) {
       qc.invalidateQueries({ queryKey: ["features"] });
       qc.invalidateQueries({ queryKey: ["feature", feature.id] });
       setOpen(false);
+      setError(null);
+    },
+    onError: (err) => {
+      setError(err);
     },
   });
 
@@ -127,6 +139,7 @@ export function EditFeatureDialog({ feature }: { feature: Feature }) {
             Update feature details.
           </DialogDescription>
         </DialogHeader>
+        <ErrorAlert error={error} />
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
             <Label htmlFor="edit-name">Name</Label>
@@ -170,6 +183,7 @@ export function EditFeatureDialog({ feature }: { feature: Feature }) {
 
 export function DeleteFeatureDialog({ feature }: { feature: Feature }) {
   const [open, setOpen] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
   const qc = useQueryClient();
 
   const mutation = useMutation({
@@ -177,6 +191,10 @@ export function DeleteFeatureDialog({ feature }: { feature: Feature }) {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["features"] });
       setOpen(false);
+      setError(null);
+    },
+    onError: (err) => {
+      setError(err);
     },
   });
 
@@ -194,6 +212,7 @@ export function DeleteFeatureDialog({ feature }: { feature: Feature }) {
             Are you sure you want to delete &quot;{feature.name}&quot;? This action cannot be undone and will delete all associated keys and translations.
           </DialogDescription>
         </DialogHeader>
+        <ErrorAlert error={error} />
         <DialogFooter>
           <Button
             variant="outline"

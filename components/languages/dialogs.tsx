@@ -22,12 +22,14 @@ import { Label } from "@/components/ui/label";
 import { Language } from "@/lib/types";
 import { Loader2, Plus, Pencil, Trash2 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
+import { ErrorAlert } from "@/components/ui/error-alert";
 
 export function CreateLanguageDialog() {
   const [open, setOpen] = useState(false);
   const [locale, setLocale] = useState("");
   const [name, setName] = useState("");
   const [isActive, setIsActive] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
   const qc = useQueryClient();
 
   const mutation = useMutation({
@@ -36,8 +38,11 @@ export function CreateLanguageDialog() {
       qc.invalidateQueries({ queryKey: ["languages"] });
       setOpen(false);
       setLocale("");
-      setName("");
       setIsActive(true);
+      setError(null);
+    },
+    onError: (err) => {
+      setError(err);
     },
   });
 
@@ -56,6 +61,7 @@ export function CreateLanguageDialog() {
             Add a new supported language to the system.
           </DialogDescription>
         </DialogHeader>
+        <ErrorAlert error={error} />
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
             <Label htmlFor="locale">Locale Code</Label>
@@ -113,6 +119,7 @@ export function EditLanguageDialog({ language }: { language: Language }) {
   const [locale, setLocale] = useState(language.locale);
   const [name, setName] = useState(language.name);
   const [isActive, setIsActive] = useState(language.isActive);
+  const [error, setError] = useState<Error | null>(null);
   const qc = useQueryClient();
 
   const mutation = useMutation({
@@ -121,6 +128,10 @@ export function EditLanguageDialog({ language }: { language: Language }) {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["languages"] });
       setOpen(false);
+      setError(null);
+    },
+    onError: (err) => {
+      setError(err);
     },
   });
 
@@ -138,6 +149,7 @@ export function EditLanguageDialog({ language }: { language: Language }) {
             Update language details.
           </DialogDescription>
         </DialogHeader>
+        <ErrorAlert error={error} />
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
             <Label htmlFor="edit-locale">Locale Code</Label>
@@ -190,6 +202,7 @@ export function EditLanguageDialog({ language }: { language: Language }) {
 
 export function DeleteLanguageDialog({ language }: { language: Language }) {
   const [open, setOpen] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
   const qc = useQueryClient();
 
   const mutation = useMutation({
@@ -197,6 +210,10 @@ export function DeleteLanguageDialog({ language }: { language: Language }) {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["languages"] });
       setOpen(false);
+      setError(null);
+    },
+    onError: (err) => {
+      setError(err);
     },
   });
 
@@ -214,6 +231,7 @@ export function DeleteLanguageDialog({ language }: { language: Language }) {
             Are you sure you want to delete &quot;{language.name}&quot; ({language.locale})? This action cannot be undone.
           </DialogDescription>
         </DialogHeader>
+        <ErrorAlert error={error} />
         <DialogFooter>
           <Button
             variant="outline"

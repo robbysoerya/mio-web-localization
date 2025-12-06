@@ -30,11 +30,13 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Translation } from "@/lib/types";
 import { Loader2, Plus, Trash2, Check } from "lucide-react";
+import { ErrorAlert } from "@/components/ui/error-alert";
 
 export function CreateTranslationDialog({ keyId }: { keyId: string }) {
   const [open, setOpen] = useState(false);
   const [locale, setLocale] = useState("");
   const [value, setValue] = useState("");
+  const [error, setError] = useState<Error | null>(null);
   const qc = useQueryClient();
 
   // Fetch available languages
@@ -64,6 +66,10 @@ export function CreateTranslationDialog({ keyId }: { keyId: string }) {
       setOpen(false);
       setLocale("");
       setValue("");
+      setError(null);
+    },
+    onError: (err) => {
+      setError(err);
     },
   });
 
@@ -100,6 +106,7 @@ export function CreateTranslationDialog({ keyId }: { keyId: string }) {
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
+          <ErrorAlert error={error} />
           <div className="grid gap-2">
             <Label htmlFor="locale">Locale</Label>
             {availableLanguages && availableLanguages.length > 0 ? (
@@ -166,6 +173,7 @@ export function CreateTranslationDialog({ keyId }: { keyId: string }) {
 
 export function DeleteTranslationDialog({ item }: { item: Translation }) {
   const [open, setOpen] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
   const qc = useQueryClient();
 
   const mutation = useMutation({
@@ -173,6 +181,10 @@ export function DeleteTranslationDialog({ item }: { item: Translation }) {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["translations", item.keyId] });
       setOpen(false);
+      setError(null);
+    },
+    onError: (err) => {
+      setError(err);
     },
   });
 
@@ -190,6 +202,7 @@ export function DeleteTranslationDialog({ item }: { item: Translation }) {
             Are you sure you want to delete the translation for &quot;{item.locale}&quot;? This action cannot be undone.
           </DialogDescription>
         </DialogHeader>
+        <ErrorAlert error={error} />
         <DialogFooter>
           <Button
             variant="outline"

@@ -7,7 +7,7 @@ import { fetchFeatures } from "@/lib/endpoints/features";
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Search, X, ArrowUpDown } from "lucide-react";
+import { Search, X, ArrowUpDown, Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -65,6 +65,7 @@ export default function AllTranslationsPage() {
   const [pageSize, setPageSize] = useState(25);
   const [sortBy, setSortBy] = useState("updatedAt");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+  const [isExporting, setIsExporting] = useState(false);
 
   // Debounce search query
   useEffect(() => {
@@ -149,24 +150,49 @@ export default function AllTranslationsPage() {
               <BulkUploadDialog />
               <Button
                 variant="outline"
-                onClick={() => {
-                  // Get all unique locales from data
-                  const allLocales = getUniqueLocales(data.data);
-                  
-                  // Filter to only include active languages
-                  const activeLocales = allLocales.filter((locale) =>
-                    languages?.some((lang) => lang.locale === locale && lang.isActive)
-                  );
-                  
-                  const csv = generateCSV(data.data, activeLocales);
-                  const filename = formatFilename(
-                    hasActiveFilters ? "translations_filtered" : "translations_all"
-                  );
-                  downloadCSV(filename, csv);
+                onClick={async () => {
+                  setIsExporting(true);
+                  try {
+                    // Fetch all translations with current filters
+                    const allData = await searchTranslations({
+                      q: debouncedSearch || undefined,
+                      locale: selectedLocale !== "all" ? selectedLocale : undefined,
+                      featureId: selectedFeature !== "all" ? selectedFeature : undefined,
+                      page: 1,
+                      limit: data?.meta?.total || 10000, // Fetch all based on total count
+                      sortBy,
+                      sortOrder,
+                    });
+
+                    if (allData.data && allData.data.length > 0) {
+                      // Get all unique locales from data
+                      const allLocales = getUniqueLocales(allData.data);
+                      
+                      // Filter to only include active languages
+                      const activeLocales = allLocales.filter((locale) =>
+                        languages?.some((lang) => lang.locale === locale && lang.isActive)
+                      );
+                      
+                      const csv = generateCSV(allData.data, activeLocales);
+                      const filename = formatFilename(
+                        hasActiveFilters ? "translations_filtered" : "translations_all"
+                      );
+                      downloadCSV(filename, csv);
+                    }
+                  } catch (error) {
+                    console.error("Failed to export:", error);
+                  } finally {
+                    setIsExporting(false);
+                  }
                 }}
+                disabled={isExporting}
               >
-                <Download className="mr-2 h-4 w-4" />
-                Export CSV
+                {isExporting ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Download className="mr-2 h-4 w-4" />
+                )}
+                {isExporting ? "Exporting..." : "Export CSV"}
               </Button>
             </>
           )}

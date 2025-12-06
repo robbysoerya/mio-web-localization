@@ -39,9 +39,9 @@ export function HealthIndicators({
             </AlertDescription>
           </Alert>
         ) : (
-          <Alert className="border-green-200 bg-green-50">
-            <CheckCircle2 className="h-4 w-4 text-green-600" />
-            <AlertDescription className="text-green-700">
+          <Alert className="border-green-200 dark:border-green-900 bg-green-50 dark:bg-green-900/20">
+            <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400" />
+            <AlertDescription className="text-green-700 dark:text-green-400">
               No orphaned keys
             </AlertDescription>
           </Alert>
@@ -58,7 +58,7 @@ export function HealthIndicators({
                 {duplicateKeys.map((dup, index) => (
                   <div
                     key={index}
-                    className="p-3 bg-white rounded border text-sm"
+                    className="p-3 bg-card rounded border text-sm"
                   >
                     <p className="font-medium mb-2">{dup.keyName}</p>
                     <div className="flex flex-wrap gap-1">
@@ -74,9 +74,9 @@ export function HealthIndicators({
             </AlertDescription>
           </Alert>
         ) : (
-          <Alert className="border-green-200 bg-green-50">
-            <CheckCircle2 className="h-4 w-4 text-green-600" />
-            <AlertDescription className="text-green-700">
+          <Alert className="border-green-200 dark:border-green-900 bg-green-50 dark:bg-green-900/20">
+            <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400" />
+            <AlertDescription className="text-green-700 dark:text-green-400">
               No duplicate keys
             </AlertDescription>
           </Alert>
@@ -93,9 +93,9 @@ export function HealthIndicators({
             </AlertDescription>
           </Alert>
         ) : (
-          <Alert className="border-green-200 bg-green-50">
-            <CheckCircle2 className="h-4 w-4 text-green-600" />
-            <AlertDescription className="text-green-700">
+          <Alert className="border-green-200 dark:border-green-900 bg-green-50 dark:bg-green-900/20">
+            <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400" />
+            <AlertDescription className="text-green-700 dark:text-green-400">
               All active features have complete translations
             </AlertDescription>
           </Alert>

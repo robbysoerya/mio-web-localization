@@ -13,7 +13,7 @@ export default function DashboardLayout({
     <QueryClientProvider client={queryClient}>
       <div className="flex min-h-screen">
         <Sidebar />
-        <main className="flex-1 p-6 bg-gray-50">{children}</main>
+        <main className="flex-1 p-6 bg-background">{children}</main>
       </div>
     </QueryClientProvider>
   );

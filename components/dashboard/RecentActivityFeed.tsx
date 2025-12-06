@@ -45,7 +45,7 @@ export function RecentActivityFeed({ data }: RecentActivityFeedProps) {
               </span>
             </div>
             <p className="text-sm text-muted-foreground line-clamp-2">
-              {item.value || <em className="text-red-500">(empty)</em>}
+              {item.value || <em className="text-red-500 dark:text-red-400">(empty)</em>}
             </p>
           </div>
         ))}

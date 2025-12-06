@@ -12,19 +12,19 @@ interface MetricCardProps {
 }
 
 const variantStyles = {
-  default: "border-gray-200 bg-white",
-  success: "border-green-200 bg-green-50",
-  warning: "border-yellow-200 bg-yellow-50",
-  danger: "border-red-200 bg-red-50",
-  info: "border-blue-200 bg-blue-50",
+  default: "border-border bg-card",
+  success: "border-green-200 dark:border-green-900 bg-green-50 dark:bg-green-900/20",
+  warning: "border-yellow-200 dark:border-yellow-900 bg-yellow-50 dark:bg-yellow-900/20",
+  danger: "border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-900/20",
+  info: "border-blue-200 dark:border-blue-900 bg-blue-50 dark:bg-blue-900/20",
 };
 
 const variantTextStyles = {
-  default: "text-gray-900",
-  success: "text-green-700",
-  warning: "text-yellow-700",
-  danger: "text-red-700",
-  info: "text-blue-700",
+  default: "text-foreground",
+  success: "text-green-700 dark:text-green-400",
+  warning: "text-yellow-700 dark:text-yellow-400",
+  danger: "text-red-700 dark:text-red-400",
+  info: "text-blue-700 dark:text-blue-400",
 };
 
 export function MetricCard({

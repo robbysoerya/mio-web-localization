@@ -43,7 +43,7 @@ export function CompletionChart({ data, title, type }: CompletionChartProps) {
                   {formatPercentage(percentage)}
                 </span>
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
+              <div className="w-full bg-secondary rounded-full h-2.5 overflow-hidden">
                 <div
                   className={`h-2.5 rounded-full transition-all ${getCompletionBarColor(
                     percentage

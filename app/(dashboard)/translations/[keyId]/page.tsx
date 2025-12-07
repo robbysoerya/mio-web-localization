@@ -31,6 +31,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { useParams } from "next/navigation";
 import { DeleteTranslationDialog } from "@/components/translations/dialogs";
+import { AITranslateButton } from "@/components/translations/AITranslateButton";
 import { useProject } from "@/contexts/ProjectContext";
 import { Language } from "@/lib/types";
 import { Card } from "@/components/ui/card";
@@ -83,11 +84,18 @@ export default function TranslationEditor() {
     return map;
   }, [existingTranslations]);
 
-  // Initialize local translations if empty
-  if (Object.keys(localTranslations).length === 0 && Object.keys(initialTranslationMap).length > 0) {
-    setLocalTranslations(initialTranslationMap);
-    setInitialTranslations(initialTranslationMap);
-  }
+  // Sync local state with server data when it changes (but preserve dirty state)
+  // This ensures AI translations and other external updates appear immediately
+  useMemo(() => {
+    if (Object.keys(initialTranslationMap).length > 0) {
+      // Only update if we have no dirty changes (unsaved edits)
+      if (dirtyLocales.size === 0) {
+        setLocalTranslations(initialTranslationMap);
+        setInitialTranslations(initialTranslationMap);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialTranslationMap]);
 
   // Merge existing translations with all active languages
   const allLocaleData = useMemo(() => {
@@ -216,18 +224,26 @@ export default function TranslationEditor() {
             )}
           </div>
           <div className="flex flex-col items-end gap-2">
-            {progress && (
-              <div className="text-right">
-                <Badge
-                  variant={progressPercentage === 100 ? "success" : "secondary"}
-                >
-                  {progress.filled}/{progress.total} translated
-                </Badge>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {progressPercentage}% complete
-                </p>
-              </div>
-            )}
+            <div className="flex items-center gap-2">
+              {progress && (
+                <div className="text-right">
+                  <Badge
+                    variant={progressPercentage === 100 ? "success" : "secondary"}
+                  >
+                    {progress.filled}/{progress.total} translated
+                  </Badge>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {progressPercentage}% complete
+                  </p>
+                </div>
+              )}
+              <AITranslateButton
+                keyId={keyId}
+                missingLocales={allLocaleData
+                  .filter((item) => !item.exists || !item.value || item.value.trim() === "")
+                  .map((item) => item.locale)}
+              />
+            </div>
           </div>
         </div>
 

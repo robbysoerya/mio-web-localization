@@ -15,6 +15,7 @@ import {
   EditFeatureDialog,
   DeleteFeatureDialog,
 } from "@/components/features/dialogs";
+import { AITranslateBatchDialog } from "@/components/features/AITranslateBatchDialog";
 
 export default function FeaturesPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -88,6 +89,11 @@ export default function FeaturesPage() {
                   <h2 className="font-semibold truncate">{feature.name}</h2>
                 </Link>
                 <div className="flex items-center gap-1">
+                  <AITranslateBatchDialog
+                    featureId={feature.id}
+                    featureName={feature.name}
+                    totalKeys={feature.totalKeys}
+                  />
                   <EditFeatureDialog feature={feature} />
                   <DeleteFeatureDialog feature={feature} />
                 </div>

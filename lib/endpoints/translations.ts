@@ -60,3 +60,10 @@ export async function bulkUploadTranslations(
     })
   ).data;
 }
+
+export async function bulkUpsertTranslations(data: {
+  keyId: string;
+  translations: Array<{ locale: string; value: string }>;
+}): Promise<Translation[]> {
+  return (await api.post("/translations/bulk-upsert", data)).data;
+}

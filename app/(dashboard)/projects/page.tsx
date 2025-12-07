@@ -81,11 +81,9 @@ export default function ProjectsPage() {
                   <DeleteProjectDialog project={project} />
                 </div>
               </div>
-              {project.description && (
-                <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-                  {project.description}
-                </p>
-              )}
+              <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+                {project.description || "No description"}
+              </p>
               <div className="flex items-center justify-between mt-auto">
                 <Badge variant="secondary">Active</Badge>
                 <Link

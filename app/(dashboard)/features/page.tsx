@@ -92,11 +92,9 @@ export default function FeaturesPage() {
                   <DeleteFeatureDialog feature={feature} />
                 </div>
               </div>
-              {feature.description && (
-                <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-                  {feature.description}
-                </p>
-              )}
+              <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+                {feature.description || "No description"}
+              </p>
               <div className="flex items-center justify-between mt-auto">
                 <Badge variant="secondary">
                   {feature.totalKeys || 0} keys

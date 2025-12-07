@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import {
   createFeature,
   updateFeature,
@@ -24,12 +24,23 @@ import { Feature } from "@/lib/types";
 import { Loader2, Plus, Pencil, Trash2 } from "lucide-react";
 import { ErrorAlert } from "@/components/ui/error-alert";
 
-export function CreateFeatureDialog() {
+export function CreateFeatureDialog({ projectId }: { projectId?: string }) {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  const [selectedProjectId, setSelectedProjectId] = useState(projectId || "");
   const [error, setError] = useState<Error | null>(null);
   const qc = useQueryClient();
+
+  // Fetch projects for selection
+  const { data: projects } = useQuery({
+    queryKey: ["projects"],
+    queryFn: async () => {
+      const { fetchProjects } = await import("@/lib/endpoints/projects");
+      return fetchProjects();
+    },
+    enabled: !projectId, // Only fetch if projectId not provided
+  });
 
   const mutation = useMutation({
     mutationFn: createFeature,
@@ -38,6 +49,7 @@ export function CreateFeatureDialog() {
       setOpen(false);
       setName("");
       setDescription("");
+      setSelectedProjectId(projectId || "");
       setError(null);
     },
     onError: (err) => {
@@ -62,6 +74,24 @@ export function CreateFeatureDialog() {
         </DialogHeader>
         <ErrorAlert error={error} />
         <div className="grid gap-4 py-4">
+          {!projectId && (
+            <div className="grid gap-2">
+              <Label htmlFor="project">Project</Label>
+              <select
+                id="project"
+                value={selectedProjectId}
+                onChange={(e) => setSelectedProjectId(e.target.value)}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <option value="">Select a project</option>
+                {projects?.map((project) => (
+                  <option key={project.id} value={project.id}>
+                    {project.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
           <div className="grid gap-2">
             <Label htmlFor="name">Name</Label>
             <Input
@@ -90,8 +120,14 @@ export function CreateFeatureDialog() {
             Cancel
           </Button>
           <Button
-            onClick={() => mutation.mutate({ name, description })}
-            disabled={!name || mutation.isPending}
+            onClick={() =>
+              mutation.mutate({
+                name,
+                description,
+                projectId: projectId || selectedProjectId,
+              })
+            }
+            disabled={!name || !(projectId || selectedProjectId) || mutation.isPending}
           >
             {mutation.isPending && (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />

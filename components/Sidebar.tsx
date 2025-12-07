@@ -3,21 +3,28 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, Layers, Globe, Languages, Settings, Sun, Moon, Zap } from "lucide-react";
+import { LayoutDashboard, Layers, Globe, Languages, Settings, Sun, Moon, Zap, FolderKanban } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
+import { ProjectSelector } from "@/components/ProjectSelector";
+import { useProject } from "@/contexts/ProjectContext";
 
 export function SidebarContent() {
   const pathname = usePathname();
   const { theme, setTheme } = useTheme();
+  const { selectedProjectId } = useProject();
 
   const links = [
-    { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { href: "/features", label: "Features", icon: Layers },
-    { href: "/translations", label: "Translations", icon: Globe },
-    { href: "/languages", label: "Languages", icon: Languages },
-    { href: "/focus", label: "Focus Mode", icon: Zap },
+    { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, requiresProject: false },
+    { href: "/projects", label: "Projects", icon: FolderKanban, requiresProject: false },
+    { href: "/features", label: "Features", icon: Layers, requiresProject: true },
+    { href: "/translations", label: "Translations", icon: Globe, requiresProject: true },
+    { href: "/languages", label: "Languages", icon: Languages, requiresProject: true },
+    { href: "/focus", label: "Focus Mode", icon: Zap, requiresProject: true },
   ];
+
+  // Filter links based on whether a specific project is selected
+  const visibleLinks = links.filter(link => !link.requiresProject || selectedProjectId);
 
   return (
     <div className="flex flex-col h-full bg-card">
@@ -29,8 +36,13 @@ export function SidebarContent() {
           <span className="font-bold text-xl tracking-tight">MioLocales</span>
         </div>
         
+        {/* Project Selector */}
+        <div className="mb-6">
+          <ProjectSelector />
+        </div>
+        
         <nav className="space-y-1.5">
-          {links.map((link) => {
+          {visibleLinks.map((link) => {
             const Icon = link.icon;
             const isActive = pathname === link.href || pathname?.startsWith(`${link.href}/`);
             

@@ -2,11 +2,13 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { fetchFeatures } from "@/lib/endpoints/features";
+import { useRouter } from "next/navigation";
+import { useProject } from "@/contexts/ProjectContext";
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import {
   CreateFeatureDialog,
@@ -16,10 +18,19 @@ import {
 
 export default function FeaturesPage() {
   const [searchQuery, setSearchQuery] = useState("");
+  const { selectedProjectId } = useProject();
+  const router = useRouter();
+
+  // Redirect to dashboard if no project is selected
+  useEffect(() => {
+    if (!selectedProjectId) {
+      router.push("/dashboard");
+    }
+  }, [selectedProjectId, router]);
 
   const { data: features } = useQuery({
-    queryKey: ["features"],
-    queryFn: fetchFeatures,
+    queryKey: ["features", selectedProjectId],
+    queryFn: () => fetchFeatures(selectedProjectId || undefined),
   });
 
   const filteredFeatures = features?.filter(
@@ -39,7 +50,7 @@ export default function FeaturesPage() {
             Manage localization features and their keys
           </p>
         </div>
-        <CreateFeatureDialog />
+        <CreateFeatureDialog projectId={selectedProjectId || undefined} />
       </div>
 
       {features.length > 0 && (

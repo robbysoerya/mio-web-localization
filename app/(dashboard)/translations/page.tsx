@@ -4,7 +4,10 @@ import { useQuery } from "@tanstack/react-query";
 import { searchTranslations } from "@/lib/endpoints/translations";
 import { fetchLanguages } from "@/lib/endpoints/languages";
 import { fetchFeatures } from "@/lib/endpoints/features";
+import { useProject } from "@/contexts/ProjectContext";
+import { Language, Feature } from "@/lib/types";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Search, X, ArrowUpDown, Loader2 } from "lucide-react";
@@ -61,6 +64,15 @@ export default function AllTranslationsPage() {
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [selectedLocale, setSelectedLocale] = useState<string>("all");
   const [selectedFeature, setSelectedFeature] = useState<string>("all");
+  const { selectedProjectId } = useProject();
+  const router = useRouter();
+
+  // Redirect to dashboard if no project is selected
+  useEffect(() => {
+    if (!selectedProjectId) {
+      router.push("/dashboard");
+    }
+  }, [selectedProjectId, router]);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(25);
   const [sortBy, setSortBy] = useState("updatedAt");
@@ -77,24 +89,26 @@ export default function AllTranslationsPage() {
   }, [searchQuery]);
 
   // Fetch languages for filter
-  const { data: languages } = useQuery({
-    queryKey: ["languages"],
-    queryFn: fetchLanguages,
+  const { data: languages } = useQuery<Language[]>({
+    queryKey: ["languages", selectedProjectId],
+    queryFn: () => fetchLanguages(selectedProjectId),
+    enabled: !!selectedProjectId,
   });
 
   // Fetch features for filter
-  const { data: features } = useQuery({
-    queryKey: ["features"],
-    queryFn: fetchFeatures,
+  const { data: features } = useQuery<Feature[]>({
+    queryKey: ["features", selectedProjectId],
+    queryFn: () => fetchFeatures(selectedProjectId),
   });
 
   // Fetch translations with search and filters
   const { data, isLoading } = useQuery({
     queryKey: [
-      "translations-search",
+      "translations",
       debouncedSearch,
       selectedLocale,
       selectedFeature,
+      selectedProjectId,
       page,
       pageSize,
       sortBy,
@@ -105,6 +119,7 @@ export default function AllTranslationsPage() {
         q: debouncedSearch || undefined,
         locale: selectedLocale !== "all" ? selectedLocale : undefined,
         featureId: selectedFeature !== "all" ? selectedFeature : undefined,
+        projectId: selectedProjectId,
         page,
         limit: pageSize,
         sortBy,
@@ -201,9 +216,9 @@ export default function AllTranslationsPage() {
 
       {/* Search and Filters */}
       <Card className="p-4 mb-6">
-        <div className="grid gap-4 md:grid-cols-4">
+        <div className="grid gap-4 md:grid-cols-3">
           {/* Search */}
-          <div className="md:col-span-2 relative">
+          <div className="md:col-span-1 relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search keys, values, or features..."

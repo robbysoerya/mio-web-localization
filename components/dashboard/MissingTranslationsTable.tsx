@@ -9,7 +9,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { useProject } from "@/contexts/ProjectContext";
+import { useRouter } from "next/navigation";
 
 interface MissingTranslationsTableProps {
   data: MissingTranslation[];
@@ -18,6 +20,16 @@ interface MissingTranslationsTableProps {
 export function MissingTranslationsTable({
   data,
 }: MissingTranslationsTableProps) {
+  const { setSelectedProjectId } = useProject();
+  const router = useRouter();
+
+  const handleEdit = (item: MissingTranslation) => {
+    // Auto-select the project
+    setSelectedProjectId(item.projectId);
+    // Navigate to the translation edit page
+    router.push(`/translations/${item.keyId}`);
+  };
+
   if (!data || data.length === 0) {
     return (
       <Card className="p-6">
@@ -40,6 +52,7 @@ export function MissingTranslationsTable({
             <TableRow>
               <TableHead>Key</TableHead>
               <TableHead>Feature</TableHead>
+              <TableHead>Project</TableHead>
               <TableHead>Missing Locales</TableHead>
               <TableHead>Filled Locales</TableHead>
               <TableHead className="text-right">Action</TableHead>
@@ -50,6 +63,9 @@ export function MissingTranslationsTable({
               <TableRow key={item.keyId}>
                 <TableCell className="font-medium">{item.keyName}</TableCell>
                 <TableCell>{item.featureName}</TableCell>
+                <TableCell>
+                  <Badge variant="outline">{item.projectName}</Badge>
+                </TableCell>
                 <TableCell>
                   <div className="flex flex-wrap gap-1">
                     {item.missingLocales.map((locale) => (
@@ -69,12 +85,14 @@ export function MissingTranslationsTable({
                   </div>
                 </TableCell>
                 <TableCell className="text-right">
-                  <Link
-                    href={`/translations/${item.keyId}`}
-                    className="text-sm text-primary hover:underline"
+                  <Button
+                    variant="link"
+                    size="sm"
+                    onClick={() => handleEdit(item)}
+                    className="text-primary hover:underline p-0 h-auto"
                   >
                     Edit →
-                  </Link>
+                  </Button>
                 </TableCell>
               </TableRow>
             ))}

@@ -8,6 +8,8 @@ import {
 } from "@/lib/endpoints/translations";
 import { fetchFeatures } from "@/lib/endpoints/features";
 import { fetchLanguages } from "@/lib/endpoints/languages";
+import { useProject } from "@/contexts/ProjectContext";
+import { Language, Feature } from "@/lib/types";
 import {
   Dialog,
   DialogContent,
@@ -33,7 +35,7 @@ import { CsvPreviewTable } from "./CsvPreviewTable";
 
 export function BulkUploadDialog() {
   const [open, setOpen] = useState(false);
-  const [featureId, setFeatureId] = useState("");
+  const [selectedFeature, setSelectedFeature] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [parsedData, setParsedData] = useState<Record<string, string>[]>([]);
   const [headers, setHeaders] = useState<string[]>([]);
@@ -43,15 +45,17 @@ export function BulkUploadDialog() {
     null
   );
   const qc = useQueryClient();
+  const { selectedProjectId } = useProject();
 
-  const { data: features } = useQuery({
-    queryKey: ["features"],
-    queryFn: fetchFeatures,
+  const { data: features } = useQuery<Feature[]>({
+    queryKey: ["features", selectedProjectId],
+    queryFn: () => fetchFeatures(selectedProjectId),
   });
 
-  const { data: languages } = useQuery({
-    queryKey: ["languages"],
-    queryFn: fetchLanguages,
+  const { data: languages } = useQuery<Language[]>({
+    queryKey: ["languages", selectedProjectId],
+    queryFn: () => fetchLanguages(selectedProjectId),
+    enabled: !!selectedProjectId,
   });
 
   const mutation = useMutation({
@@ -99,7 +103,7 @@ export function BulkUploadDialog() {
   };
 
   const handleUpload = () => {
-    if (parsedData.length > 0 && featureId && languages) {
+    if (parsedData.length > 0 && selectedFeature && languages) {
       // Get valid language codes
       const validLocales = new Set(languages.map((l: { locale: string }) => l.locale));
       validLocales.add("key"); // Always allow 'key'
@@ -129,7 +133,7 @@ export function BulkUploadDialog() {
       const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
       const newFile = new File([blob], file?.name || "upload.csv", { type: "text/csv" });
       
-      mutation.mutate({ featureId, file: newFile });
+      mutation.mutate({ featureId: selectedFeature, file: newFile });
     }
   };
 
@@ -139,7 +143,7 @@ export function BulkUploadDialog() {
     setParsedData([]);
     setHeaders([]);
     setOriginalHeaders([]);
-    setFeatureId("");
+    setSelectedFeature("");
     setUploadResult(null);
   };
 
@@ -163,7 +167,7 @@ export function BulkUploadDialog() {
           <div className="grid gap-2">
             <Label htmlFor="feature">Feature</Label>
             <div className="max-w-sm">
-              <Select value={featureId} onValueChange={setFeatureId}>
+              <Select value={selectedFeature} onValueChange={setSelectedFeature}>
                 <SelectTrigger 
                   id="feature" 
                   className="w-full focus:ring-offset-0 focus:ring-1 dark:focus:ring-gray-600"
@@ -282,7 +286,7 @@ export function BulkUploadDialog() {
           {(!uploadResult || uploadResult.error) && (
             <Button
               onClick={handleUpload}
-              disabled={!file || !featureId || mutation.isPending || isParsing}
+              disabled={!file || !selectedFeature || mutation.isPending || isParsing}
             >
               {mutation.isPending ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />

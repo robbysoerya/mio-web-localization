@@ -3,6 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { fetchStatistics } from "@/lib/endpoints/statistics";
 import { fetchFeatures } from "@/lib/endpoints/features";
+import { useProject } from "@/contexts/ProjectContext";
 import { MetricCard } from "@/components/dashboard/MetricCard";
 import { CompletionChart } from "@/components/dashboard/CompletionChart";
 import { MissingTranslationsTable } from "@/components/dashboard/MissingTranslationsTable";
@@ -28,18 +29,19 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
 export default function DashboardPage() {
+  const { selectedProjectId } = useProject();
   const [selectedFeatureId, setSelectedFeatureId] = useState<
     string | undefined
   >(undefined);
 
   const { data: statistics, isLoading } = useQuery({
-    queryKey: ["statistics", selectedFeatureId],
-    queryFn: () => fetchStatistics(selectedFeatureId),
+    queryKey: ["statistics", selectedFeatureId, selectedProjectId],
+    queryFn: () => fetchStatistics(selectedFeatureId, selectedProjectId),
   });
 
   const { data: features } = useQuery({
-    queryKey: ["features"],
-    queryFn: fetchFeatures,
+    queryKey: ["features", selectedProjectId],
+    queryFn: () => fetchFeatures(selectedProjectId),
   });
 
   if (isLoading) {
@@ -68,6 +70,7 @@ export default function DashboardPage() {
             Monitor translation progress, quality, and system health
           </p>
         </div>
+        {/* Feature Filter */}
         {features && features.length > 0 && (
           <div className="w-64">
             <Select

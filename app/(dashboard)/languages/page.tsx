@@ -2,6 +2,9 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { fetchLanguages } from "@/lib/endpoints/languages";
+import { useProject } from "@/contexts/ProjectContext";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -12,9 +15,20 @@ import {
 import { Loader2 } from "lucide-react";
 
 export default function LanguagesPage() {
+  const { selectedProjectId } = useProject();
+  const router = useRouter();
+
+  // Redirect to dashboard if no project is selected
+  useEffect(() => {
+    if (!selectedProjectId) {
+      router.push("/dashboard");
+    }
+  }, [selectedProjectId, router]);
+
   const { data: languages, isLoading } = useQuery({
-    queryKey: ["languages"],
-    queryFn: fetchLanguages,
+    queryKey: ["languages", selectedProjectId],
+    queryFn: () => fetchLanguages(selectedProjectId),
+    enabled: !!selectedProjectId,
   });
 
   if (isLoading) {
@@ -34,7 +48,7 @@ export default function LanguagesPage() {
             Manage supported languages for your application
           </p>
         </div>
-        <CreateLanguageDialog />
+        <CreateLanguageDialog projectId={selectedProjectId} />
       </div>
 
       {!languages || languages.length === 0 ? (

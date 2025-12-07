@@ -1,15 +1,26 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FocusSetup } from "@/components/focus/FocusSetup";
 import { FocusSession } from "@/components/focus/FocusSession";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, ArrowRight } from "lucide-react";
+import { useProject } from "@/contexts/ProjectContext";
+import { useRouter } from "next/navigation";
 
 export default function FocusPage() {
   const [mode, setMode] = useState<"setup" | "session" | "complete">("setup");
   const [queue, setQueue] = useState<Array<{ keyId: string; keyName: string; featureName: string; locale: string }>>([]);
+  const { selectedProjectId } = useProject();
+  const router = useRouter();
+
+  // Redirect to dashboard if no project is selected
+  useEffect(() => {
+    if (!selectedProjectId) {
+      router.push("/dashboard");
+    }
+  }, [selectedProjectId, router]);
 
   const handleStart = (newQueue: typeof queue) => {
     setQueue(newQueue);

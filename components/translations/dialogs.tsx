@@ -8,6 +8,7 @@ import {
   fetchTranslations,
 } from "@/lib/endpoints/translations";
 import { fetchLanguages } from "@/lib/endpoints/languages";
+import { useProject } from "@/contexts/ProjectContext";
 import {
   Dialog,
   DialogContent,
@@ -38,11 +39,13 @@ export function CreateTranslationDialog({ keyId }: { keyId: string }) {
   const [value, setValue] = useState("");
   const [error, setError] = useState<Error | null>(null);
   const qc = useQueryClient();
+  const { selectedProjectId } = useProject();
 
   // Fetch available languages
   const { data: languages } = useQuery({
-    queryKey: ["languages"],
-    queryFn: fetchLanguages,
+    queryKey: ["languages", selectedProjectId],
+    queryFn: () => fetchLanguages(selectedProjectId),
+    enabled: !!selectedProjectId,
   });
 
   // Fetch existing translations for this key

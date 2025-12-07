@@ -1,7 +1,17 @@
+export interface Project {
+  id: string;
+  name: string;
+  description?: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Feature {
   id: string;
   name: string;
   description?: string;
+  projectId: string;
   totalKeys?: number;
 }
 
@@ -35,6 +45,8 @@ export interface MissingTranslation {
   keyName: string;
   featureId: string;
   featureName: string;
+  projectId: string;
+  projectName: string;
   missingLocales: string[];
   filledLocales: string[];
 }
@@ -120,6 +132,7 @@ export interface TranslationSearchParams {
   q?: string;
   locale?: string;
   featureId?: string;
+  projectId?: string;
   page?: number;
   limit?: number;
   sortBy?: string;

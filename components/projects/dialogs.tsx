@@ -3,10 +3,10 @@
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
-  createLanguage,
-  updateLanguage,
-  deleteLanguage,
-} from "@/lib/endpoints/languages";
+  createProject,
+  updateProject,
+  deleteProject,
+} from "@/lib/endpoints/projects";
 import {
   Dialog,
   DialogContent,
@@ -19,26 +19,25 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Language } from "@/lib/types";
+import { Textarea } from "@/components/ui/textarea";
+import { Project } from "@/lib/types";
 import { Loader2, Plus, Pencil, Trash2 } from "lucide-react";
-import { Switch } from "@/components/ui/switch";
 import { ErrorAlert } from "@/components/ui/error-alert";
 
-export function CreateLanguageDialog({ projectId }: { projectId?: string }) {
+export function CreateProjectDialog() {
   const [open, setOpen] = useState(false);
-  const [locale, setLocale] = useState("");
   const [name, setName] = useState("");
-  const [isActive, setIsActive] = useState(true);
+  const [description, setDescription] = useState("");
   const [error, setError] = useState<Error | null>(null);
   const qc = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: createLanguage,
+    mutationFn: createProject,
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["languages"] });
+      qc.invalidateQueries({ queryKey: ["projects"] });
       setOpen(false);
-      setLocale("");
-      setIsActive(true);
+      setName("");
+      setDescription("");
       setError(null);
     },
     onError: (err) => {
@@ -51,44 +50,35 @@ export function CreateLanguageDialog({ projectId }: { projectId?: string }) {
       <DialogTrigger asChild>
         <Button>
           <Plus className="mr-2 h-4 w-4" />
-          Add Language
+          Create Project
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Add Language</DialogTitle>
+          <DialogTitle>Create Project</DialogTitle>
           <DialogDescription>
-            Add a new supported language to the system.
+            Add a new project to organize your localization features.
           </DialogDescription>
         </DialogHeader>
         <ErrorAlert error={error} />
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
-            <Label htmlFor="locale">Locale Code</Label>
-            <Input
-              id="locale"
-              value={locale}
-              onChange={(e) => setLocale(e.target.value)}
-              placeholder="e.g. en-US"
-              className="font-mono"
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="name">Display Name</Label>
+            <Label htmlFor="name">Name</Label>
             <Input
               id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="e.g. English (US)"
+              placeholder="e.g. Mobile App"
             />
           </div>
-          <div className="flex items-center space-x-2">
-            <Switch
-              id="isActive"
-              checked={isActive}
-              onCheckedChange={setIsActive}
+          <div className="grid gap-2">
+            <Label htmlFor="description">Description</Label>
+            <Textarea
+              id="description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Optional description..."
             />
-            <Label htmlFor="isActive">Active</Label>
           </div>
         </div>
         <DialogFooter>
@@ -100,13 +90,13 @@ export function CreateLanguageDialog({ projectId }: { projectId?: string }) {
             Cancel
           </Button>
           <Button
-            onClick={() => mutation.mutate({ locale, name, isActive, projectId: projectId! })}
-            disabled={!locale || !name || !projectId || mutation.isPending}
+            onClick={() => mutation.mutate({ name, description })}
+            disabled={!name || mutation.isPending}
           >
             {mutation.isPending && (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             )}
-            Add
+            Create
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -114,19 +104,19 @@ export function CreateLanguageDialog({ projectId }: { projectId?: string }) {
   );
 }
 
-export function EditLanguageDialog({ language }: { language: Language }) {
+export function EditProjectDialog({ project }: { project: Project }) {
   const [open, setOpen] = useState(false);
-  const [locale, setLocale] = useState(language.locale);
-  const [name, setName] = useState(language.name);
-  const [isActive, setIsActive] = useState(language.isActive);
+  const [name, setName] = useState(project.name);
+  const [description, setDescription] = useState(project.description || "");
   const [error, setError] = useState<Error | null>(null);
   const qc = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: (data: { locale: string; name: string; isActive: boolean }) =>
-      updateLanguage(language.id, data),
+    mutationFn: (data: { name: string; description?: string }) =>
+      updateProject(project.id, data),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["languages"] });
+      qc.invalidateQueries({ queryKey: ["projects"] });
+      qc.invalidateQueries({ queryKey: ["project", project.id] });
       setOpen(false);
       setError(null);
     },
@@ -144,37 +134,28 @@ export function EditLanguageDialog({ language }: { language: Language }) {
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Edit Language</DialogTitle>
+          <DialogTitle>Edit Project</DialogTitle>
           <DialogDescription>
-            Update language details.
+            Update project details.
           </DialogDescription>
         </DialogHeader>
         <ErrorAlert error={error} />
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
-            <Label htmlFor="edit-locale">Locale Code</Label>
-            <Input
-              id="edit-locale"
-              value={locale}
-              onChange={(e) => setLocale(e.target.value)}
-              className="font-mono"
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="edit-name">Display Name</Label>
+            <Label htmlFor="edit-name">Name</Label>
             <Input
               id="edit-name"
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
           </div>
-          <div className="flex items-center space-x-2">
-            <Switch
-              id="edit-isActive"
-              checked={isActive}
-              onCheckedChange={setIsActive}
+          <div className="grid gap-2">
+            <Label htmlFor="edit-description">Description</Label>
+            <Textarea
+              id="edit-description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
             />
-            <Label htmlFor="edit-isActive">Active</Label>
           </div>
         </div>
         <DialogFooter>
@@ -186,8 +167,8 @@ export function EditLanguageDialog({ language }: { language: Language }) {
             Cancel
           </Button>
           <Button
-            onClick={() => mutation.mutate({ locale, name, isActive })}
-            disabled={!locale || !name || mutation.isPending}
+            onClick={() => mutation.mutate({ name, description })}
+            disabled={!name || mutation.isPending}
           >
             {mutation.isPending && (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -200,15 +181,15 @@ export function EditLanguageDialog({ language }: { language: Language }) {
   );
 }
 
-export function DeleteLanguageDialog({ language }: { language: Language }) {
+export function DeleteProjectDialog({ project }: { project: Project }) {
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const qc = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: () => deleteLanguage(language.id),
+    mutationFn: () => deleteProject(project.id),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["languages"] });
+      qc.invalidateQueries({ queryKey: ["projects"] });
       setOpen(false);
       setError(null);
     },
@@ -226,9 +207,9 @@ export function DeleteLanguageDialog({ language }: { language: Language }) {
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Delete Language</DialogTitle>
+          <DialogTitle>Delete Project</DialogTitle>
           <DialogDescription>
-            Are you sure you want to delete &quot;{language.name}&quot; ({language.locale})? This action cannot be undone.
+            Are you sure you want to delete &quot;{project.name}&quot;? This action will deactivate the project and all associated features.
           </DialogDescription>
         </DialogHeader>
         <ErrorAlert error={error} />

@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchFeatures } from "@/lib/endpoints/features";
 import { fetchLanguages } from "@/lib/endpoints/languages";
 import { fetchStatistics } from "@/lib/endpoints/statistics";
+import { useProject } from "@/contexts/ProjectContext";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -25,20 +26,22 @@ export function FocusSetup({ onStart }: FocusSetupProps) {
   const [selectedLocale, setSelectedLocale] = useState<string>("");
   const [selectedFeature, setSelectedFeature] = useState<string>("all");
   const [isGenerating, setIsGenerating] = useState(false);
+  const { selectedProjectId } = useProject();
 
   const { data: features } = useQuery({
-    queryKey: ["features"],
-    queryFn: fetchFeatures,
+    queryKey: ["features", selectedProjectId],
+    queryFn: () => fetchFeatures(selectedProjectId),
   });
 
   const { data: languages } = useQuery({
-    queryKey: ["languages"],
-    queryFn: fetchLanguages,
+    queryKey: ["languages", selectedProjectId],
+    queryFn: () => fetchLanguages(selectedProjectId),
+    enabled: !!selectedProjectId,
   });
 
   const { data: statistics, isLoading: isLoadingStats } = useQuery({
-    queryKey: ["statistics", selectedFeature === "all" ? undefined : selectedFeature],
-    queryFn: () => fetchStatistics(selectedFeature === "all" ? undefined : selectedFeature),
+    queryKey: ["statistics", selectedFeature === "all" ? undefined : selectedFeature, selectedProjectId],
+    queryFn: () => fetchStatistics(selectedFeature === "all" ? undefined : selectedFeature, selectedProjectId),
   });
 
   const handleStart = () => {

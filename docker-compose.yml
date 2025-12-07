@@ -4,6 +4,8 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: mio-web-localization
+    mem_limit: 256m
+    cpus: "0.5"
     restart: always
     ports:
       - "3000:3000"

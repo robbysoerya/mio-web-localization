@@ -145,9 +145,9 @@ export default function AllTranslationsPage() {
           {data?.meta && (
             <Badge variant="secondary">{data.meta.total} translations</Badge>
           )}
+          <BulkUploadDialog />
           {data?.data && data.data.length > 0 && (
             <>
-              <BulkUploadDialog />
               <Button
                 variant="outline"
                 onClick={async () => {

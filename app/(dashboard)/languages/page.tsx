@@ -3,7 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { fetchLanguages } from "@/lib/endpoints/languages";
 import { useProject } from "@/contexts/ProjectContext";
-import { useRouter } from "next/navigation";
+// useRouter removed
 import { useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -13,17 +13,17 @@ import {
   DeleteLanguageDialog,
 } from "@/components/languages/dialogs";
 import { Loader2 } from "lucide-react";
+import { Language } from "@/lib/types";
 
 export default function LanguagesPage() {
   const { selectedProjectId } = useProject();
-  const router = useRouter();
-
+  
   // Redirect to dashboard if no project is selected
   useEffect(() => {
     if (!selectedProjectId) {
-      router.push("/dashboard");
+      window.location.href = "/dashboard";
     }
-  }, [selectedProjectId, router]);
+  }, [selectedProjectId]);
 
   const { data: languages, isLoading } = useQuery({
     queryKey: ["languages", selectedProjectId],
@@ -59,7 +59,7 @@ export default function LanguagesPage() {
         </Card>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {languages.map((language) => (
+          {languages.map((language: Language) => (
             <Card key={language.id} className="p-4">
               <div className="flex items-start justify-between mb-4">
                 <div>

@@ -7,19 +7,19 @@ import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
-import { useState } from "react";
+import { useState, use } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
-import { useParams } from "next/navigation";
+// useParams removed
+import { KeyItem } from "@/lib/types";
 import {
   CreateKeyDialog,
   EditKeyDialog,
   DeleteKeyDialog,
 } from "@/components/keys/dialogs";
 
-export default function FeaturePage() {
-  const params = useParams();
-  const id = params.id as string;
+export default function FeaturePage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
   const [searchQuery, setSearchQuery] = useState("");
 
   const { data: feature } = useQuery({
@@ -34,7 +34,7 @@ export default function FeaturePage() {
     enabled: !!id,
   });
 
-  const filteredKeys = keys?.filter((k) =>
+  const filteredKeys = keys?.filter((k: KeyItem) =>
     k.key.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -81,7 +81,7 @@ export default function FeaturePage() {
         </Card>
       ) : (
         <div className="space-y-3">
-          {filteredKeys.map((k) => (
+          {filteredKeys.map((k: KeyItem) => (
             <Card
               key={k.id}
               className="p-4 hover:bg-muted/50 transition-colors"

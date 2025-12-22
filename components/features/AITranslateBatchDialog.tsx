@@ -21,6 +21,7 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
+import { Language } from "@/lib/types";
 
 interface AITranslateBatchDialogProps {
   featureId: string;
@@ -49,18 +50,18 @@ export function AITranslateBatchDialog({
     enabled: !!selectedProjectId && open,
   });
 
-  const activeLanguages = languages?.filter((lang) => lang.isActive) || [];
+  const activeLanguages = languages?.filter((lang: Language) => lang.isActive) || [];
 
   const mutation = useMutation({
     mutationFn: aiTranslateBatch,
-    onSuccess: (data) => {
+    onSuccess: (data: AITranslateBatchResponse) => {
       qc.invalidateQueries({ queryKey: ["features"] });
       qc.invalidateQueries({ queryKey: ["translations"] });
       setError(null);
       setSuccessData(data);
       setShowSuccess(true);
     },
-    onError: (err) => {
+    onError: (err: Error) => {
       setError(err);
     },
   });
@@ -147,7 +148,7 @@ export function AITranslateBatchDialog({
 
               {!translateAll && (
                 <div className="ml-6 space-y-2 max-h-[200px] overflow-y-auto">
-                  {activeLanguages.map((lang) => (
+                  {activeLanguages.map((lang: Language) => (
                     <div key={lang.id} className="flex items-center space-x-2">
                       <Checkbox
                         id={`locale-${lang.locale}`}

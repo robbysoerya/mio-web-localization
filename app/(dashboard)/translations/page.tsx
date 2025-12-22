@@ -5,9 +5,9 @@ import { searchTranslations } from "@/lib/endpoints/translations";
 import { fetchLanguages } from "@/lib/endpoints/languages";
 import { fetchFeatures } from "@/lib/endpoints/features";
 import { useProject } from "@/contexts/ProjectContext";
-import { Language, Feature } from "@/lib/types";
+import { Language, Feature, PaginatedResponse, TranslationListItem } from "@/lib/types";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+// useRouter removed due to build issues
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Search, X, ArrowUpDown, Loader2 } from "lucide-react";
@@ -65,14 +65,13 @@ export default function AllTranslationsPage() {
   const [selectedLocale, setSelectedLocale] = useState<string>("all");
   const [selectedFeature, setSelectedFeature] = useState<string>("all");
   const { selectedProjectId } = useProject();
-  const router = useRouter();
-
+  
   // Redirect to dashboard if no project is selected
   useEffect(() => {
     if (!selectedProjectId) {
-      router.push("/dashboard");
+      window.location.href = "/dashboard";
     }
-  }, [selectedProjectId, router]);
+  }, [selectedProjectId]);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(25);
   const [sortBy, setSortBy] = useState("updatedAt");
@@ -102,7 +101,7 @@ export default function AllTranslationsPage() {
   });
 
   // Fetch translations with search and filters
-  const { data, isLoading } = useQuery({
+  const { data, isLoading } = useQuery<PaginatedResponse<TranslationListItem>>({
     queryKey: [
       "translations",
       debouncedSearch,
@@ -185,7 +184,7 @@ export default function AllTranslationsPage() {
                       
                       // Filter to only include active languages
                       const activeLocales = allLocales.filter((locale) =>
-                        languages?.some((lang) => lang.locale === locale && lang.isActive)
+                        languages?.some((lang: Language) => lang.locale === locale && lang.isActive)
                       );
                       
                       const csv = generateCSV(allData.data, activeLocales);
@@ -235,7 +234,7 @@ export default function AllTranslationsPage() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All locales</SelectItem>
-              {languages?.map((lang) => (
+              {languages?.map((lang: Language) => (
                 <SelectItem key={lang.id} value={lang.locale}>
                   {lang.locale} - {lang.name}
                 </SelectItem>
@@ -250,7 +249,7 @@ export default function AllTranslationsPage() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All features</SelectItem>
-              {features?.map((feature) => (
+              {features?.map((feature: Feature) => (
                 <SelectItem key={feature.id} value={feature.id}>
                   {feature.name}
                 </SelectItem>
@@ -273,14 +272,14 @@ export default function AllTranslationsPage() {
             {selectedLocale !== "all" && (
               <Badge variant="secondary">
                 Locale:{" "}
-                {languages?.find((l) => l.locale === selectedLocale)?.name ||
+                {languages?.find((l: Language) => l.locale === selectedLocale)?.name ||
                   selectedLocale}
               </Badge>
             )}
             {selectedFeature !== "all" && (
               <Badge variant="secondary">
                 Feature:{" "}
-                {features?.find((f) => f.id === selectedFeature)?.name ||
+                {features?.find((f: Feature) => f.id === selectedFeature)?.name ||
                   "Unknown"}
               </Badge>
             )}
@@ -357,7 +356,7 @@ export default function AllTranslationsPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {data.data.map((translation) => (
+                {data.data.map((translation: TranslationListItem) => (
                   <TableRow key={translation.id}>
                     <TableCell className="font-mono text-sm font-medium">
                       {translation.keyName}

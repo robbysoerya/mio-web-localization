@@ -19,7 +19,7 @@ import { Input } from "@/components/ui/input";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { useState, useMemo } from "react";
+import { useState, useMemo, use } from "react";
 import { Loader2, AlertCircle, Save, X } from "lucide-react";
 import {
   Select,
@@ -29,17 +29,23 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { useParams } from "next/navigation";
 import { DeleteTranslationDialog } from "@/components/translations/dialogs";
 import { AITranslateButton } from "@/components/translations/AITranslateButton";
 import { useProject } from "@/contexts/ProjectContext";
-import { Language } from "@/lib/types";
+import { Language, Translation } from "@/lib/types";
 import { Card } from "@/components/ui/card";
 import { ErrorAlert } from "@/components/ui/error-alert";
 
-export default function TranslationEditor() {
-  const params = useParams();
-  const keyId = params.keyId as string;
+interface LocaleDataItem {
+  locale: string;
+  languageName: string;
+  translationId?: string;
+  value: string;
+  exists: boolean;
+}
+
+export default function TranslationEditor({ params }: { params: Promise<{ keyId: string }> }) {
+  const { keyId } = use(params);
   const qc = useQueryClient();
   const { selectedProjectId } = useProject();
   
@@ -61,7 +67,7 @@ export default function TranslationEditor() {
   });
 
   // Fetch existing translations
-  const { data: existingTranslations, isLoading: translationsLoading } = useQuery({
+  const { data: existingTranslations, isLoading: translationsLoading } = useQuery<Translation[]>({
     queryKey: ["translations", keyId],
     queryFn: () => fetchTranslations(keyId),
     enabled: !!keyId,
@@ -78,7 +84,7 @@ export default function TranslationEditor() {
   const initialTranslationMap = useMemo(() => {
     if (!existingTranslations) return {};
     const map: Record<string, string> = {};
-    existingTranslations.forEach((t) => {
+    existingTranslations.forEach((t: Translation) => {
       map[t.locale] = t.value || "";
     });
     return map;
@@ -98,13 +104,13 @@ export default function TranslationEditor() {
   }, [initialTranslationMap]);
 
   // Merge existing translations with all active languages
-  const allLocaleData = useMemo(() => {
+  const allLocaleData = useMemo<LocaleDataItem[]>(() => {
     if (!languages) return [];
     
-    const activeLanguages = languages.filter((lang) => lang.isActive);
-    const existingMap = new Map(existingTranslations?.map((t) => [t.locale, t]) || []);
+    const activeLanguages = languages.filter((lang: Language) => lang.isActive);
+    const existingMap = new Map<string, Translation>(existingTranslations?.map((t: Translation) => [t.locale, t]) || []);
     
-    return activeLanguages.map((lang) => {
+    return activeLanguages.map<LocaleDataItem>((lang: Language) => {
       const existing = existingMap.get(lang.locale);
       return {
         locale: lang.locale,
@@ -124,7 +130,7 @@ export default function TranslationEditor() {
       setDirtyLocales(new Set());
       setError(null);
     },
-    onError: (err) => {
+    onError: (err: Error) => {
       setError(err);
     },
   });
@@ -169,7 +175,7 @@ export default function TranslationEditor() {
   };
 
   // Filter data based on selected filter
-  const filteredData = allLocaleData.filter((item) => {
+  const filteredData = allLocaleData.filter((item: LocaleDataItem) => {
     if (filter === "empty") return !item.value || item.value.trim() === "";
     if (filter === "filled") return item.value && item.value.trim() !== "";
     return true;
@@ -179,7 +185,7 @@ export default function TranslationEditor() {
   const progress = allLocaleData.length > 0
     ? {
         total: allLocaleData.length,
-        filled: allLocaleData.filter((item) => item.value && item.value.trim() !== "").length,
+        filled: allLocaleData.filter((item: LocaleDataItem) => item.value && item.value.trim() !== "").length,
       }
     : null;
 
@@ -240,8 +246,8 @@ export default function TranslationEditor() {
               <AITranslateButton
                 keyId={keyId}
                 missingLocales={allLocaleData
-                  .filter((item) => !item.exists || !item.value || item.value.trim() === "")
-                  .map((item) => item.locale)}
+                  .filter((item: LocaleDataItem) => !item.exists || !item.value || item.value.trim() === "")
+                  .map((item: LocaleDataItem) => item.locale)}
               />
             </div>
           </div>

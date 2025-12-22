@@ -2,8 +2,9 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { fetchFeatures } from "@/lib/endpoints/features";
-import { useRouter } from "next/navigation";
+// useRouter removed
 import { useProject } from "@/contexts/ProjectContext";
+import { Feature } from "@/lib/types";
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -20,14 +21,13 @@ import { AITranslateBatchDialog } from "@/components/features/AITranslateBatchDi
 export default function FeaturesPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const { selectedProjectId } = useProject();
-  const router = useRouter();
-
+  
   // Redirect to dashboard if no project is selected
   useEffect(() => {
     if (!selectedProjectId) {
-      router.push("/dashboard");
+      window.location.href = "/dashboard";
     }
-  }, [selectedProjectId, router]);
+  }, [selectedProjectId]);
 
   const { data: features } = useQuery({
     queryKey: ["features", selectedProjectId],
@@ -35,7 +35,7 @@ export default function FeaturesPage() {
   });
 
   const filteredFeatures = features?.filter(
-    (f) =>
+    (f: Feature) =>
       f.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       f.description?.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -76,7 +76,7 @@ export default function FeaturesPage() {
         </Card>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {filteredFeatures.map((feature) => (
+          {filteredFeatures.map((feature: Feature) => (
             <Card
               key={feature.id}
               className="p-4 hover:shadow-md transition-shadow"
